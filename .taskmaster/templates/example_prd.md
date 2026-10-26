@@ -44,4 +44,8 @@
 [Include any additional information:
 - Research findings
 - Technical specifications]
+# Changelog
+[Newest first. One dated line per change to this PRD, with the Taskmaster task ID that prompted it:
+- YYYY-MM-DD — Initial PRD approved.
+- YYYY-MM-DD — (task 12) Added offline mode to Core Features; moved X out of scope.]
 </PRD>

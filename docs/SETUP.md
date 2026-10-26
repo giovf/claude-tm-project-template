@@ -33,7 +33,7 @@
 - `git rev-parse --is-inside-work-tree` — if this isn't a git repo, stop and
   ask the user to run `git init` and make an initial commit of the template
   first (that's their step by design).
-- Confirm the toolchain: `node --version` (expect 22.x), `task-master --version`,
+- Confirm the toolchain: `node --version` (expect the current LTS), `task-master --version`,
   `gh --version`.
 - Create `docs/SETUP-PROGRESS.md` now.
 
@@ -87,12 +87,15 @@ at the next natural rebuild; note that in the progress file.
 - Most scaffolders (`create-next-app`, `create-expo-app`, `npm create vite`, …)
   refuse non-empty directories. Scaffold to a temp folder and merge:
   ```bash
-  cd /workspaces && npx <scaffolder> _scaffold-tmp <flags>
+  cd /workspaces && npx <scaffolder>@latest _scaffold-tmp <flags>
   cd -
   rsync -rltD --exclude='node_modules' --exclude='.git' /workspaces/_scaffold-tmp/. ./
   rm -rf /workspaces/_scaffold-tmp
   npm install
   ```
+  Always invoke scaffolders as `<name>@latest` (npx otherwise reuses a
+  cached older copy) and add packages with `npm install <pkg>@latest` —
+  never hand-write version numbers into `package.json` or the Dockerfile.
   Watch for collisions on `.gitignore` / `README.md` / `tsconfig.json` — merge
   by hand rather than letting the scaffolder clobber template files.
 - Apply the house style: TypeScript **strict** mode, ESLint + Prettier wired
@@ -107,6 +110,9 @@ at the next natural rebuild; note that in the progress file.
   as the structural reference. Base it on the scope + interview answers. Where
   something is genuinely undecided, put it in an explicit **Open questions**
   section rather than inventing detail.
+- End the PRD with a `# Changelog` section (see the template) whose first
+  entry is today's date + "Initial PRD approved". Every later PRD change adds
+  a dated line there — this is the blueprint's history.
 - Show the user a summary (goals, feature list, phasing, out-of-scope) and
   iterate until they **explicitly approve** it. Do not parse an unapproved PRD
   — the backlog it generates shapes all future work.
@@ -130,11 +136,16 @@ what makes the *next* session competent without re-explaining the project.
 
 - `CLAUDE.md` — fill in every `<!-- SETUP: ... -->` marker (stack, run/test
   commands, conventions). Delete the markers. Keep it small and high-signal.
+  **Leave the "Working loop" section intact** — it is the methodology every
+  future session follows.
 - `docs/ARCHITECTURE.md` — fill in the skeleton with the decisions actually
   made (what we're building, stack, layout, services, out-of-scope list).
 - `.env.example` — add the project's real variables with placeholder values
   and comments on where each comes from. Ask the user to create `.env` from it
   when secrets are needed (never write real secrets yourself).
+- `LICENSE` — the template's license file applies to the template, not the
+  user's project. Ask which license they want (or none/proprietary) and
+  replace or delete it accordingly.
 - `README.md` — replace the template README with a project README (what it
   is, how to run it, how the dev container works in two lines).
 
@@ -144,7 +155,10 @@ what makes the *next* session competent without re-explaining the project.
   number of tasks generated, and anything left open.
 - Suggest an initial commit (offer a message; they run it or ask you to).
 - Offer to delete the setup machinery now that it's done: `docs/SETUP.md`,
-  `docs/SETUP-PROGRESS.md`, `.claude/commands/setup.md`, and the leftover
+  `docs/SETUP-PROGRESS.md`, `.claude/commands/setup.md`,
+  `.github/workflows/close-external-prs.yml` (template-repo only; inert
+  here), and the leftover
   first-run banner in `.devcontainer/post-create.sh`. Only delete on a yes.
-- Point them at the daily loop: `task-master next` → implement →
-  `task-master set-status --id=<id> --status=done`.
+- Explain the working loop now in force (CLAUDE.md → "Working loop"): every
+  functional change gets a Taskmaster task, a complexity score, subtasks if
+  it scores > 6/10, and a PRD/changelog check — they don't need to ask for it.

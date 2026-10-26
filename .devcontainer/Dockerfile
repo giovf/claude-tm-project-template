@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/base:ubuntu-24.04
+FROM mcr.microsoft.com/devcontainers/base:ubuntu
 
 # ============================================================================
 # GLOBAL LAYER — stack-agnostic. Every project gets this.
@@ -28,8 +28,8 @@ RUN apt-get update \
       fd-find \
  && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-# ---------- Node.js 22 LTS ----------
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+# ---------- Node.js (current LTS at build time) ----------
+RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
  && apt-get install -y nodejs \
  && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
@@ -53,11 +53,13 @@ RUN mkdir -p /home/vscode/.npm-global \
 # typescript      — TS compiler
 # pnpm, yarn      — alternate package managers (npm is the default)
 # task-master-ai  — task management CLI + MCP server
+# Unpinned on purpose: latest at build time. Docker caches this layer, so use
+# "Dev Containers: Rebuild Without Cache" to pick up newer versions.
 RUN npm install -g \
-      typescript \
-      pnpm \
-      yarn \
-      task-master-ai
+      typescript@latest \
+      pnpm@latest \
+      yarn@latest \
+      task-master-ai@latest
 
 # ============================================================================
 # PROJECT-SPECIFIC LAYER — edited by Claude during /setup.
@@ -67,6 +69,7 @@ RUN npm install -g \
 #   Native/embedded:    apt: cmake, ninja-build
 #   Data/ML:            apt/pip: handled via project venv instead where possible
 #
+# Don't pin versions here — install latest (apt default / npm @latest).
 # After editing, the user must rebuild the container
 # (Command Palette -> "Dev Containers: Rebuild Container").
 # ============================================================================

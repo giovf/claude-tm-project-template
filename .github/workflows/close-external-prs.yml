@@ -1,0 +1,27 @@
+# This template doesn't accept contributions: auto-close PRs from anyone but
+# the owner. The repository check keeps it inert in projects copied from the
+# template.
+name: Close external PRs
+
+on:
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  close:
+    if: >-
+      github.repository == 'giovf/claude-tm-project-template' &&
+      github.event.pull_request.user.login != github.repository_owner
+    runs-on: ubuntu-latest
+    steps:
+      - run: >-
+          gh pr close "$PR" --repo "$REPO" --comment
+          "Thanks for your interest! This template doesn't accept pull
+          requests. Feel free to fork it or open an issue instead."
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}

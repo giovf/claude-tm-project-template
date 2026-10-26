@@ -28,13 +28,34 @@ high-signal — it's part of every prompt, so verbosity costs tokens.
      design tokens, folder layout). For UI projects: enable the frontend-design
      plugin and reference the design-token location here. -->
 
-## Workflow
-- Use Taskmaster for breaking down work. Before implementing any non-trivial
-  feature, check `task-master next` or read `.taskmaster/tasks/tasks.json`.
-- Update task status with `task-master set-status --id <id> --status done` as
-  you complete each one.
+## Working loop (mandatory — applies even if the user doesn't mention Taskmaster)
+A **functional change** is anything that changes behaviour: features, bug
+fixes, behaviour-changing refactors, new deps, schema/API changes. Docs-only,
+formatting, typo fixes and answering questions are exempt. For every
+functional change, before writing code:
+
+1. **File it** — reuse the task that already covers it, otherwise
+   `task-master add-task --prompt="<what and why>"`.
+2. **Score it** — `task-master analyze-complexity --id=<id> --threshold=7`,
+   then read the score with `task-master complexity-report`.
+3. **Split if > 6/10** — `task-master expand --id=<id>` (uses the report's
+   recommended subtask count). Then work subtask by subtask.
+4. **Check the blueprint** — does the change alter scope, features, data
+   model, stack, external services or the out-of-scope list? If so, update
+   `.taskmaster/docs/prd.md` and add a dated entry to its `## Changelog`;
+   if a stable decision changed, update `docs/ARCHITECTURE.md` too. Changes
+   to approved scope need the user's OK first.
+5. **Implement** — `set-status --status=in-progress`, log notes with
+   `task-master update-subtask`, verify (typecheck/lint/tests — not "should
+   work"), then `set-status --status=done`.
+
+- Never hand-edit `.taskmaster/tasks/tasks.json` — use the CLI/MCP tools.
 - Don't commit `node_modules/`, `.taskmaster/reports/`, or anything in
   `.gitignore`.
+
+## Dependencies
+- Add deps with `npm install <pkg>@latest` (or the scaffolder's `@latest`);
+  never hand-type version numbers. The lockfile provides reproducibility.
 
 ## Things to ask before doing
 - Adding a new top-level dependency

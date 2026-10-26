@@ -1,7 +1,7 @@
 # Claude Project Template
 
 A dev-container starter for new projects, built around **Claude Code +
-Taskmaster**. The container ships only the global toolchain (Node 22, git,
+Taskmaster**. The container ships only the global toolchain (Node LTS, git,
 GitHub CLI, Claude Code, Taskmaster, TypeScript); everything project-specific
 is added by Claude during a guided `/setup` conversation based on the project
 scope you give it.
@@ -10,16 +10,22 @@ scope you give it.
 > follows is `docs/SETUP.md`. At the end of setup, Claude replaces this README
 > with a real project README.
 
+> **Contributions:** this template is shared as-is and doesn't accept pull
+> requests (they're closed automatically). Issues and the wiki are open for
+> questions and bug reports. Fork it freely — it's MIT-licensed.
+
 ## Getting started
 
-1. **Copy the template into a new folder** (note the `/.` — it copies dotfiles
-   too):
+1. **Copy the template into a new folder.** Either click **"Use this
+   template"** on GitHub and clone your new repo, or copy a local clone (note
+   the `/.` — it copies dotfiles too):
 
    ```bash
-   cp -a claude-project-template/. /path/to/my-new-project/
+   cp -a claude-tm-project-template/. /path/to/my-new-project/
    ```
 
-2. **Make it a git repo** (you own git setup by design):
+2. **Make it a git repo** (skip if you used "Use this template"; you own git
+   setup by design):
 
    ```bash
    cd /path/to/my-new-project
@@ -54,7 +60,7 @@ scope you give it.
 
 | Path | What it is |
 | --- | --- |
-| `.devcontainer/` | Ubuntu 24.04 + Node 22 image, global CLIs, per-project volumes for Claude auth / `node_modules` / shell history. Project deps get added between the `<<PROJECT-DEPS-*>>` markers in the Dockerfile. |
+| `.devcontainer/` | Ubuntu LTS + Node LTS image (latest at build time), global CLIs, per-project volumes for Claude auth / `node_modules` / shell history. Project deps get added between the `<<PROJECT-DEPS-*>>` markers in the Dockerfile. |
 | `CLAUDE.md` | Always-loaded project instructions (conventions, workflow). Contains `SETUP:` markers Claude fills in during setup. |
 | `docs/SETUP.md` | The guided-setup playbook Claude follows after `/setup`. |
 | `docs/ARCHITECTURE.md` | Architecture summary skeleton, imported into every Claude session via `CLAUDE.md`. |
@@ -62,6 +68,7 @@ scope you give it.
 | `.claude/commands/tm/` | Slash commands for common Taskmaster operations (`/tm/next-task`, `/tm/parse-prd`, …). |
 | `.mcp.json` | Registers the `task-master-ai` MCP server (approve it once when Claude Code asks). |
 | `.taskmaster/` | Taskmaster config (uses the `claude-code` provider — **no API keys needed**), PRD template, docs folder. |
+| `LICENSE` | MIT license for the template. `/setup` asks which license your project wants and replaces it. |
 | `.env.example` | Baseline env file; extended with project variables during setup. |
 
 ## Notes

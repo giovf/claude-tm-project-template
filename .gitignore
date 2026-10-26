@@ -11,6 +11,9 @@ out/
 .env
 .env*.local
 
+# ── Dev container lockfile (pins feature versions; we want latest)
+.devcontainer/devcontainer-lock.json
+
 # ── Logs
 logs/
 *.log
