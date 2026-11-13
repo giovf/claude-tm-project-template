@@ -60,6 +60,11 @@ Only ask what the scope doesn't already answer. Cover, at most:
 4. **Constraints** — timeline, target users/regions, compliance (privacy law,
    accessibility), anything that changes architecture.
 5. **v1 boundary** — the 2–3 things that are explicitly *out* of scope.
+6. **Code graph (optional)** — "Add Graphify, a local knowledge graph of the
+   codebase that Claude queries before grepping? (default: **No**)". Tell them
+   in one line: it's free and local for code, pays off as the codebase grows,
+   and adds hooks that nudge Claude toward the graph and rebuild it on every
+   commit. Details in Step 8.
 
 Record all answers in the progress file's "Decisions so far" section.
 
@@ -76,6 +81,17 @@ Now that the stack is decided, work out what the container is missing:
 - **Container name** → rename `"name"` in `devcontainer.json` to the project.
 - **UI projects** → enable the frontend-design plugin in `.claude/settings.json`:
   `{"enabledPlugins": {"frontend-design@claude-plugins-official": true}}`.
+- **Graphify (only if the user said yes in Step 2)** → add
+  `RUN pipx install graphifyy` between the Dockerfile markers. The PyPI
+  package is `graphifyy` with a **double y** — other `graphify*` packages are
+  unaffiliated; the CLI it installs is `graphify`. Then append to
+  `.devcontainer/post-create.sh`, just above the first-run banner, so a fresh
+  clone gets its git hooks and graph back:
+  ```bash
+  if command -v graphify >/dev/null 2>&1 && [ -d .claude/skills/graphify ]; then
+    graphify hook install && graphify update . || true
+  fi
+  ```
 
 If (and only if) you changed the **Dockerfile**, the user must rebuild now —
 follow the rebuild procedure in Ground rules, then resume here.
@@ -149,10 +165,50 @@ what makes the *next* session competent without re-explaining the project.
 - `README.md` — replace the template README with a project README (what it
   is, how to run it, how the dev container works in two lines).
 
-## Step 8 — Wrap up
+## Step 8 — Code graph (optional — skip unless the user said yes in Step 2)
+
+[Graphify](https://github.com/Graphify-Labs/graphify) builds a knowledge graph
+of the code in `graphify-out/` using local tree-sitter parsing (no API key, no
+LLM cost for code). Run this step after the scaffold exists and `CLAUDE.md` is
+filled in, from the repo root:
+
+1. `graphify --help` — confirm the CLI is there (installed by the Dockerfile
+   line from Step 3; if the rebuild hasn't happened yet, do that first).
+2. `graphify install --project` — one command that writes the `/graphify`
+   skill to `.claude/skills/graphify/`, appends a `## graphify` section to
+   `CLAUDE.md` (and a pointer in `.claude/CLAUDE.md`), and merges two hooks into `.claude/settings.json`: a
+   `PreToolUse` nudge on Read/Glob/Grep/Bash and a `SessionStart` reset. The
+   nudge is advisory (it never blocks) and stays silent while no graph exists.
+   Existing content in both files is kept — verify that, then delete the
+   backup it leaves at `.claude/settings.json.graphify-bak`.
+3. `graphify hook install` — git hooks (post-commit / checkout / merge /
+   rewrite) that rebuild the graph in the background, code-only, plus a
+   `.gitattributes` merge-driver line. These live in `.git/`, which is why
+   Step 3 re-installs them from `post-create.sh`.
+4. `graphify update .` — build the first graph. **Verify**:
+   `graphify-out/graph.json` exists and `graphify explain "<a real symbol>"`
+   returns something.
+5. `graphify-out/` is already in `.gitignore` (it is rewritten whole on every
+   build). The user should commit `.claude/`, `CLAUDE.md` and `.gitattributes`.
+
+Leave these **off** unless the user asks: strict mode (lets the hook block
+reads), the MCP server (`graphifyy[mcp]` — duplicates the skill), and semantic
+extraction of docs/PDFs/images (`/graphify .` — spends LLM tokens). Mention
+them once in the wrap-up. To remove everything later:
+`graphify hook uninstall && graphify uninstall --purge`, then delete
+`.claude/skills/graphify/` and the graphify lines in `.claude/CLAUDE.md` by
+hand (uninstall leaves them behind) and drop the Dockerfile and
+`post-create.sh` lines.
+
+Working rule to pass on to the user: the graph only reflects the last commit
+(or the last `graphify update .`), and edges marked `INFERRED` are guesses —
+Claude still reads the real file before editing it.
+
+## Step 9 — Wrap up
 
 - Summarise for the user: stack chosen, what was scaffolded, PRD status,
-  number of tasks generated, and anything left open.
+  number of tasks generated, whether Graphify was installed, and anything
+  left open.
 - Suggest an initial commit (offer a message; they run it or ask you to).
 - Offer to delete the setup machinery now that it's done: `docs/SETUP.md`,
   `docs/SETUP-PROGRESS.md`, `.claude/commands/setup.md`,

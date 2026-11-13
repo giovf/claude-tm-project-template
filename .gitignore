@@ -32,6 +32,10 @@ dev-debug.log
 .taskmaster/reports/
 .taskmaster/state.json
 
+# ── Graphify (optional code graph; rebuilt locally on every commit)
+graphify-out/
+.claude/settings.json.graphify-bak
+
 # ── Claude Code local files
 .claude/.credentials.json
 .claude/projects/

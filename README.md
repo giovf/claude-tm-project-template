@@ -50,6 +50,10 @@ scope you give it.
    it asks for your project scope (a file or a description), interviews you on
    the gaps, picks/confirms the stack, extends the dev container, scaffolds
    the project, drafts a PRD with you, and initialises the Taskmaster backlog.
+   It also offers one optional add-on (default: no):
+   [Graphify](https://github.com/Graphify-Labs/graphify), a local knowledge
+   graph of your code that Claude queries before grepping and that rebuilds
+   itself on every commit.
 
    Setup usually includes **one container rebuild** (to bake in stack-specific
    dependencies). Claude will tell you exactly when and how; afterwards, start
